@@ -32,6 +32,19 @@ dart run build_runner build --delete-conflicting-outputs   # gera os adapters do
 flutter run
 ```
 
+## Vincular ao Firebase
+
+O app abre em modo local antes da configuração. Para vincular o SDK ao seu projeto Firebase, execute uma vez na raiz do repositório:
+
+1. Instale a [Firebase CLI](https://firebase.google.com/docs/cli) e entre com a conta que tem acesso ao projeto usando `firebase login`.
+2. Instale a ferramenta de configuração com `dart pub global activate flutterfire_cli`.
+3. Execute `flutterfire configure`, escolha seu projeto e selecione as plataformas que vai usar (Android, iOS, Web ou Windows). Confirme a substituição de `lib/firebase_options.dart` quando solicitado. A ferramenta preenche a chave de API e os identificadores de cada aplicativo.
+4. Execute `flutter run` na plataforma configurada. Se o app já estava aberto, encerre a execução e inicie de novo.
+
+Para usar um registro de app existente, o pacote Android é `com.coontrera.coontrera_mobile` e o bundle ID do iOS é `com.coontrera.coontreraMobile`. No Windows, se o terminal não reconhecer `flutterfire`, use `dart pub global run flutterfire_cli:flutterfire configure` no passo 3.
+
+A vinculação inicializa o Firebase Core. O login, as contas de demonstração e os agendamentos continuam no Hive. Para sincronizá-los com o Firebase, será preciso integrar os respectivos repositórios com Authentication e Firestore.
+
 ## Testes
 
 ```
