@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'app.dart';
+import 'core/firebase/firebase_bootstrap.dart';
 import 'data/local/hive_boxes.dart';
 import 'data/local/hive_bootstrap.dart';
 import 'data/local/seed_service.dart';
@@ -14,6 +15,7 @@ import 'data/models/service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeFirebaseIfConfigured();
   await initializeDateFormatting('pt_BR', null);
   await HiveBootstrap.init();
 
