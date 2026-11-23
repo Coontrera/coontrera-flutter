@@ -58,8 +58,14 @@ class _AppointmentDetailContentState extends State<_AppointmentDetailContent> {
     );
     if (reason == null || !mounted) return;
     setState(() => _isCancelling = true);
-    await widget.onCancel(reason);
-    if (mounted) Navigator.of(context).pop();
+    try {
+      await widget.onCancel(reason);
+      if (mounted) Navigator.of(context).pop();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isCancelling = false);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Não foi possível atualizar a consulta. Confira sua conexão e tente novamente.')));
+    }
   }
 
   @override

@@ -1,3 +1,5 @@
+import '../../../../data/providers/repository_providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_colors_extension.dart';
@@ -6,14 +8,15 @@ import '../../../../core/utils/validators.dart';
 import '../widgets/auth_header_logo.dart';
 import '../widgets/auth_text_field.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
+class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  ConsumerState<ForgotPasswordScreen> createState() =>
+      _ForgotPasswordScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   bool _isLoading = false;
@@ -29,7 +32,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     FocusScope.of(context).unfocus();
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 700));
+    try {
+      await ref
+          .read(authRepositoryProvider)
+          .resetPassword(_emailController.text);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+      return;
+    }
     if (!mounted) return;
     setState(() {
       _isLoading = false;
@@ -55,7 +69,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   borderRadius: BorderRadius.circular(AppRadius.lg),
                   boxShadow: colors.cardShadow,
                 ),
-                child: _submitted ? _buildSuccess(context) : _buildForm(context),
+                child: _submitted
+                    ? _buildSuccess(context)
+                    : _buildForm(context),
               ),
             ),
           ),
@@ -73,7 +89,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         children: [
           const AuthHeaderLogo(
             title: 'Esqueceu sua senha?',
-            subtitle: 'Informe seu e-mail e enviaremos instruções de recuperação',
+            subtitle:
+                'Informe seu e-mail e enviaremos instruções de recuperação',
           ),
           const SizedBox(height: AppSpace.lg),
           AuthTextField(
@@ -119,7 +136,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             color: colors.success.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
-          child: Icon(Icons.mark_email_read_outlined, color: colors.success, size: 36),
+          child: Icon(
+            Icons.mark_email_read_outlined,
+            color: colors.success,
+            size: 36,
+          ),
         ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
         const SizedBox(height: AppSpace.lg),
         Text('Verifique seu e-mail', style: theme.textTheme.headlineSmall),

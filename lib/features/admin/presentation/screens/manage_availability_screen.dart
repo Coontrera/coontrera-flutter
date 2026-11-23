@@ -21,6 +21,18 @@ const _weekdayNames = {
 class ManageAvailabilityScreen extends ConsumerWidget {
   const ManageAvailabilityScreen({super.key});
 
+  Future<bool> _save(BuildContext context, Future<void> Function() action) async {
+    try {
+      await action();
+      return true;
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Não foi possível salvar a disponibilidade. Confira a conexão e tente novamente.')));
+      }
+      return false;
+    }
+  }
+
   Future<void> _pickTime(BuildContext context, WidgetRef ref, DayAvailability day, bool isStart) async {
     final parts = (isStart ? day.startTime : day.endTime).split(':');
     final initial = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
@@ -32,6 +44,10 @@ class ManageAvailabilityScreen extends ConsumerWidget {
       startTime: isStart ? formatted : null,
       endTime: isStart ? null : formatted,
     );
+    if (updated.startTime.compareTo(updated.endTime) >= 0) {
+      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('O fim deve ser depois do início.')));
+      return;
+    }
     await ref.read(availabilityRepositoryProvider).updateWeeklyAvailability(updated);
     ref.invalidate(weeklyAvailabilityProvider);
   }
@@ -69,7 +85,7 @@ class ManageAvailabilityScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Disponibilidade')),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _addBlock(context, ref),
+        onPressed: () => _save(context, () => _addBlock(context, ref)),
         icon: const Icon(Icons.add),
         label: const Text('Bloquear data'),
       ),
@@ -97,7 +113,7 @@ class ManageAvailabilityScreen extends ConsumerWidget {
                         contentPadding: EdgeInsets.zero,
                         title: Text(_weekdayNames[day.weekday] ?? ''),
                         value: day.isOpen,
-                        onChanged: (v) => _toggleOpen(ref, day, v),
+                        onChanged: (v) => _save(context, () => _toggleOpen(ref, day, v)),
                       ),
                       if (day.isOpen)
                         Padding(
@@ -106,14 +122,14 @@ class ManageAvailabilityScreen extends ConsumerWidget {
                             children: [
                               Expanded(
                                 child: OutlinedButton(
-                                  onPressed: () => _pickTime(context, ref, day, true),
+                                  onPressed: () => _save(context, () => _pickTime(context, ref, day, true)),
                                   child: Text('Início: ${day.startTime}'),
                                 ),
                               ),
                               const SizedBox(width: AppSpace.sm),
                               Expanded(
                                 child: OutlinedButton(
-                                  onPressed: () => _pickTime(context, ref, day, false),
+                                  onPressed: () => _save(context, () => _pickTime(context, ref, day, false)),
                                   child: Text('Fim: ${day.endTime}'),
                                 ),
                               ),
@@ -154,7 +170,7 @@ class ManageAvailabilityScreen extends ConsumerWidget {
                       ),
                       child: const Icon(Icons.delete_outline, color: Colors.white),
                     ),
-                    onDismissed: (_) => _removeBlock(ref, b.id),
+                    confirmDismiss: (_) => _save(context, () => _removeBlock(ref, b.id)),
                     child: Container(
                       margin: const EdgeInsets.only(bottom: AppSpace.sm),
                       padding: const EdgeInsets.all(AppSpace.md),

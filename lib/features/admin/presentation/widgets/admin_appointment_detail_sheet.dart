@@ -49,8 +49,14 @@ class _AdminAppointmentDetailContentState extends State<_AdminAppointmentDetailC
 
   Future<void> _update(AppointmentStatus status) async {
     setState(() => _isUpdating = true);
-    await widget.onUpdateStatus(status);
-    if (mounted) Navigator.of(context).pop();
+    try {
+      await widget.onUpdateStatus(status);
+      if (mounted) Navigator.of(context).pop();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isUpdating = false);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Não foi possível atualizar a consulta. Confira sua conexão e tente novamente.')));
+    }
   }
 
   @override

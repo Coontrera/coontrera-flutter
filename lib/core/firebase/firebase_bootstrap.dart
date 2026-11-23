@@ -3,15 +3,16 @@ import 'package:flutter/foundation.dart';
 
 import '../../firebase_options.dart';
 
-Future<void> initializeFirebaseIfConfigured() async {
+Future<bool> initializeFirebaseIfConfigured() async {
   final FirebaseOptions options;
   try {
     options = DefaultFirebaseOptions.currentPlatform;
   } on UnsupportedError catch (error) {
     // O FlutterFire também usa UnsupportedError para plataformas não selecionadas.
     debugPrint('Usando o modo local. ${error.message}');
-    return;
+    return false;
   }
 
   await Firebase.initializeApp(options: options);
+  return true;
 }

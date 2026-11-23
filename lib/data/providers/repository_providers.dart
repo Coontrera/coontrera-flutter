@@ -1,3 +1,5 @@
+import '../firebase/firebase_auth_repository.dart';
+import '../firebase/firestore_agenda.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import '../local/hive_boxes.dart';
@@ -28,7 +30,11 @@ final _weeklyBoxProvider =
     Provider<Box<DayAvailability>>((ref) => Hive.box<DayAvailability>(HiveBoxes.weeklyAvailability));
 final _metaBoxProvider = Provider<Box>((ref) => Hive.box(HiveBoxes.meta));
 
+final firebaseEnabledProvider = Provider<bool>((ref) => false);
+final _agendaProvider = Provider<FirestoreAgenda>((ref) => FirestoreAgenda());
+
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  if (ref.watch(firebaseEnabledProvider)) return FirebaseAuthRepository();
   return MockAuthRepository(
     usersBox: ref.watch(_usersBoxProvider),
     metaBox: ref.watch(_metaBoxProvider),
@@ -40,6 +46,7 @@ final serviceRepositoryProvider = Provider<ServiceRepository>((ref) {
 });
 
 final availabilityRepositoryProvider = Provider<AvailabilityRepository>((ref) {
+  if (ref.watch(firebaseEnabledProvider)) return ref.watch(_agendaProvider);
   return MockAvailabilityRepository(
     weeklyBox: ref.watch(_weeklyBoxProvider),
     blockedBox: ref.watch(_blockedBoxProvider),
@@ -48,6 +55,7 @@ final availabilityRepositoryProvider = Provider<AvailabilityRepository>((ref) {
 });
 
 final appointmentRepositoryProvider = Provider<AppointmentRepository>((ref) {
+  if (ref.watch(firebaseEnabledProvider)) return ref.watch(_agendaProvider);
   return MockAppointmentRepository(
     appointmentsBox: ref.watch(_appointmentsBoxProvider),
     availabilityRepository: ref.watch(availabilityRepositoryProvider),
