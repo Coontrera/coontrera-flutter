@@ -1,3 +1,4 @@
+import '../../../../data/providers/repository_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -160,7 +161,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ],
                       ),
                       const SizedBox(height: AppSpace.sm),
-                      _DemoAccountsPanel(
+                      if (!ref.watch(firebaseEnabledProvider)) _DemoAccountsPanel(
                         expanded: _showDemoAccounts,
                         onToggle: () => setState(() => _showDemoAccounts = !_showDemoAccounts),
                         onSelect: _fillDemo,

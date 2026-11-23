@@ -1,0 +1,88 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function signedIn() { return request.auth != null; }
+    function admin() {
+      return signedIn() && get(/databases/$(db)/documents/profiles/$(request.auth.uid)).data.role == 'admin';
+    }
+    match /profiles/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || admin());
+      allow list: if admin();
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['email','name','phone','role','createdAt'])
+        && request.resource.data.role == 'client' && request.resource.data.email == request.auth.token.email
+        && request.resource.data.name is string && request.resource.data.phone is string
+        && request.resource.data.createdAt == request.time;
+    }
+    match /weekly/{weekday} {
+      allow read: if signedIn();
+      allow write: if admin() && request.resource.data.open is bool
+        && request.resource.data.start is int && request.resource.data.end is int
+        && request.resource.data.start >= 0 && request.resource.data.start < request.resource.data.end
+        && request.resource.data.end <= 1440 && request.resource.data.step is int && request.resource.data.step == 60;
+    }
+    match /blocks/{id} { allow read, write: if admin(); }
+
+    function slot(v) {
+      return /databases/$(db)/documents/days/$(v.day)/slots/$(int(v.minute / 60));
+    }
+    function visit(id) { return /databases/$(db)/documents/appointments/$(id); }
+    function openTime(v) {
+      // Unix day zero is Thursday. Clinic times use UTC-3.
+      let weekday = (v.day + 3) % 7 + 1;
+      let hours = /databases/$(db)/documents/weekly/$(weekday);
+      let h = exists(hours) ? get(hours).data : {'start':480,'end':1080,'step':60,'open':weekday <= 5};
+      let daily = /databases/$(db)/documents/days/$(v.day);
+      return h.open && v.minute >= h.start && v.minute + h.step <= h.end
+        && (v.minute - h.start) % h.step == 0
+        && (!exists(daily) || (!get(daily).data.closed && !(v.minute in get(daily).data.minutes)))
+        && (v.day * 1440 + v.minute + 180) * 60000 > request.time.toMillis();
+    }
+    match /days/{day} {
+      allow read: if signedIn();
+      allow write: if admin();
+      match /slots/{hour} {
+        function paired(id) {
+          let v = getAfter(visit(id)).data;
+          return day == string(v.day) && hour == string(int(v.minute / 60)) && request.resource.data.minute == v.minute;
+        }
+        allow read: if signedIn();
+        allow create: if signedIn() && request.resource.data.keys().hasOnly(['appointment','minute'])
+          && !exists(visit(request.resource.data.appointment))
+          && paired(request.resource.data.appointment)
+          && getAfter(visit(request.resource.data.appointment)).data.clientId == request.auth.uid;
+        allow delete: if signedIn() && get(visit(resource.data.appointment)).data.status != 'cancelled'
+          && getAfter(visit(resource.data.appointment)).data.status == 'cancelled';
+      }
+    }
+    match /appointments/{id} {
+      function clearNeighbor(v, hour) {
+        let other = /databases/$(db)/documents/days/$(v.day)/slots/$(hour);
+        return !existsAfter(other) || getAfter(other).data.minute <= v.minute - 60
+          || getAfter(other).data.minute >= v.minute + 60;
+      }
+      function validBooking(v) {
+        return v.keys().hasOnly(['clientId','serviceId','day','minute','notes','status','createdAt'])
+          && v.clientId == request.auth.uid && v.status == 'pending' && v.createdAt == request.time
+          && v.serviceId in ['fisioterapia','pilates','quiropraxia','hidroterapia','liberacao','dryneedling']
+          && (v.notes == null || v.notes is string) && v.day is int && v.day >= 0 && v.day < 1000000
+          && v.minute is int && openTime(v) && !exists(slot(v))
+          && getAfter(slot(v)).data.appointment == id
+          && clearNeighbor(v, int(v.minute / 60) - 1) && clearNeighbor(v, int(v.minute / 60) + 1);
+      }
+      function cancelling(v) {
+        return v.status == 'cancelled' && v.cancelledBy == request.auth.uid
+          && (v.cancelReason == null || v.cancelReason is string)
+          && v.diff(resource.data).affectedKeys().hasOnly(['status','cancelledBy','cancelReason'])
+          && !existsAfter(slot(resource.data));
+      }
+      allow read: if signedIn() && (resource.data.clientId == request.auth.uid || admin());
+      allow create: if signedIn() && validBooking(request.resource.data);
+      allow update: if signedIn() && resource.data.status in ['pending','confirmed']
+        && ((resource.data.clientId == request.auth.uid || admin()) && cancelling(request.resource.data)
+          || admin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+             && (resource.data.status == 'pending' && request.resource.data.status == 'confirmed'
+               || resource.data.status == 'confirmed' && request.resource.data.status == 'completed'));
+    }
+  }
+}

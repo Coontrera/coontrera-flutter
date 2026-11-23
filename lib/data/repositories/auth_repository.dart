@@ -11,6 +11,7 @@ abstract class AuthRepository {
   });
 
   Future<void> logout();
+  Future<void> resetPassword(String email);
 
   /// Restores a previously persisted session (survives app restarts).
   Future<AppUser?> restoreSession();

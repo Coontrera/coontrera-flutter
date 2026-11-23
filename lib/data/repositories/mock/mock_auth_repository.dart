@@ -9,6 +9,10 @@ import '../repository_exceptions.dart';
 import 'mock_latency.dart';
 
 class MockAuthRepository implements AuthRepository {
+  @override
+  Future<void> resetPassword(String email) async {
+    throw const AuthException("O envio de e-mail está disponível após vincular o Firebase.");
+  }
   MockAuthRepository({required this.usersBox, required this.metaBox});
 
   final Box<AppUser> usersBox;
