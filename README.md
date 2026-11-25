@@ -2,15 +2,6 @@
 
 App Flutter da Clínica Coontrera (Pilates e Fisioterapia). Nas plataformas configuradas, o app usa Firebase Authentication e Cloud Firestore diretamente. Antes da vinculação, ele inicia em modo de demonstração local.
 
-## Contas de demonstração
-
-| Papel  | E-mail                  | Senha        |
-|--------|--------------------------|--------------|
-| Admin  | admin@coontrera.com      | Admin@123    |
-| Cliente| cliente@coontrera.com    | Cliente@123  |
-
-No modo local (plataformas sem Firebase configurado, como macOS e Linux), os dados são semeados automaticamente no primeiro uso (serviços, horários padrão, clientes de exemplo e alguns agendamentos) e persistem localmente entre reinicializações. A tela de login não exibe atalho de seleção de contas de demonstração; no modo local, informe as credenciais acima manualmente.
-
 ## Funcionalidades
 
 - **Institucional**: Início, Serviços, Sobre Nós, Contato — conteúdo migrado do site original.
@@ -57,4 +48,3 @@ Para habilitar o painel administrativo, cadastre uma conta própria pelo app. No
 flutter analyze
 flutter test
 ```
-# coontrera-flutter
