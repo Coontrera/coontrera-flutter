@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "278060160759",
+    "project_id": "coontrera-app",
+    "storage_bucket": "coontrera-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278060160759:android:9167aec873b031feeaa5f2",
+        "android_client_info": {
+          "package_name": "com.coontrera.coontrera_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2EXhFK5zB-Im-XyITPUFmpphM83vLxwo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

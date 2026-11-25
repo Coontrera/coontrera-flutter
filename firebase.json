@@ -1,16 +1,1 @@
-{
-  "firestore": {
-    "rules": "firestore.rules"
-  },
-  "emulators": {
-    "auth": {
-      "port": 9099
-    },
-    "firestore": {
-      "port": 8080
-    },
-    "ui": {
-      "enabled": false
-    }
-  }
-}
+{"firestore":{"rules":"firestore.rules"},"emulators":{"auth":{"port":9099},"firestore":{"port":8080},"ui":{"enabled":false}},"flutter":{"platforms":{"android":{"default":{"projectId":"coontrera-app","appId":"1:278060160759:android:9167aec873b031feeaa5f2","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"coontrera-app","configurations":{"android":"1:278060160759:android:9167aec873b031feeaa5f2","ios":"1:278060160759:ios:b7404b3ba9529644eaa5f2","web":"1:278060160759:web:d6e5dde99e29535ceaa5f2","windows":"1:278060160759:web:936c1d71013949a6eaa5f2"}}}}}}

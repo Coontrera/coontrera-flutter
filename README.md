@@ -9,7 +9,7 @@ App Flutter da Clínica Coontrera (Pilates e Fisioterapia). Nas plataformas conf
 | Admin  | admin@coontrera.com      | Admin@123    |
 | Cliente| cliente@coontrera.com    | Cliente@123  |
 
-No modo local, os dados são semeados automaticamente no primeiro uso (serviços, horários padrão, clientes de exemplo e alguns agendamentos) e persistem localmente entre reinicializações.
+No modo local (plataformas sem Firebase configurado, como macOS e Linux), os dados são semeados automaticamente no primeiro uso (serviços, horários padrão, clientes de exemplo e alguns agendamentos) e persistem localmente entre reinicializações. A tela de login não exibe atalho de seleção de contas de demonstração; no modo local, informe as credenciais acima manualmente.
 
 ## Funcionalidades
 
@@ -34,7 +34,7 @@ flutter run
 
 ## Vincular ao Firebase
 
-A versão Web já está vinculada ao projeto `coontrera-app`. Execute `flutter run -d chrome` para abrir no navegador. Em um projeto Firebase novo, habilite os serviços e publique as regras (passos 4 e 5). Para configurar outras plataformas, siga os passos abaixo:
+As plataformas **Android, iOS, Web e Windows** já estão vinculadas ao projeto `coontrera-app` em `lib/firebase_options.dart` (com `android/app/google-services.json` configurado para Android). Em um projeto Firebase novo ou para reconfigurar/adicionar outras plataformas (como macOS e Linux), siga os passos abaixo:
 
 1. Instale a [Firebase CLI](https://firebase.google.com/docs/cli) e entre com a conta que tem acesso ao projeto usando `firebase login`.
 2. Instale a ferramenta de configuração com `dart pub global activate flutterfire_cli`.
@@ -43,7 +43,7 @@ A versão Web já está vinculada ao projeto `coontrera-app`. Execute `flutter r
 5. Na raiz do repositório, execute `firebase deploy --only firestore:rules --project SEU_ID_DO_PROJETO`, substituindo o ID pelo mesmo projeto selecionado no passo 3. As regras acompanham o código em `firestore.rules`.
 6. Execute `flutter run` na plataforma configurada. Se o app já estava aberto, encerre a execução e inicie de novo.
 
-Para usar um registro de app existente, o pacote Android é `com.coontrera.coontrera_mobile` e o bundle ID do iOS é `com.coontrera.coontreraMobile`. No Windows, se o terminal não reconhecer `flutterfire`, use `dart pub global run flutterfire_cli:flutterfire configure` no passo 3.
+Para usar um registro de app existente, o pacote Android é `com.coontrera.coontrera_mobile` e o bundle ID do iOS é `com.coontrera.coontreraMobile`. No Windows, se o terminal não reconhecer `flutterfire`, use `dart pub global run flutterfire_cli:flutterfire configure` no passo 3. Para compilar no iOS em um Mac, execute novamente o `flutterfire configure` no macOS para gerar `ios/Runner/GoogleService-Info.plist`.
 
 ### Conferir a vinculação
 

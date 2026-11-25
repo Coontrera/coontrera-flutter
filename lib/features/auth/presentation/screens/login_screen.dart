@@ -1,4 +1,3 @@
-import '../../../../data/providers/repository_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,7 +22,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _showDemoAccounts = false;
   int _shakeSeed = 0;
 
   @override
@@ -43,11 +41,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (state.hasError && mounted) {
       setState(() => _shakeSeed++);
     }
-  }
-
-  void _fillDemo(String email, String password) {
-    _emailController.text = email;
-    _passwordController.text = password;
   }
 
   @override
@@ -160,140 +153,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: AppSpace.sm),
-                      if (!ref.watch(firebaseEnabledProvider)) _DemoAccountsPanel(
-                        expanded: _showDemoAccounts,
-                        onToggle: () => setState(() => _showDemoAccounts = !_showDemoAccounts),
-                        onSelect: _fillDemo,
-                      ),
                     ],
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DemoAccountsPanel extends StatelessWidget {
-  const _DemoAccountsPanel({
-    required this.expanded,
-    required this.onToggle,
-    required this.onSelect,
-  });
-
-  final bool expanded;
-  final VoidCallback onToggle;
-  final void Function(String email, String password) onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: colors.border.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-      ),
-      child: Column(
-        children: [
-          InkWell(
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-            onTap: onToggle,
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpace.sm),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, size: 18, color: colors.textSecondary),
-                  const SizedBox(width: AppSpace.xs),
-                  Expanded(
-                    child: Text(
-                      'Contas de demonstração',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                  Icon(
-                    expanded ? Icons.expand_less : Icons.expand_more,
-                    size: 20,
-                    color: colors.textSecondary,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (expanded)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpace.sm, 0, AppSpace.sm, AppSpace.sm),
-              child: Column(
-                children: [
-                  _DemoAccountTile(
-                    label: 'Administrador',
-                    email: 'admin@coontrera.com',
-                    password: 'Admin@123',
-                    onTap: () => onSelect('admin@coontrera.com', 'Admin@123'),
-                  ),
-                  const SizedBox(height: AppSpace.xs),
-                  _DemoAccountTile(
-                    label: 'Cliente',
-                    email: 'cliente@coontrera.com',
-                    password: 'Cliente@123',
-                    onTap: () => onSelect('cliente@coontrera.com', 'Cliente@123'),
-                  ),
-                ],
-              ),
-            ).animate().fadeIn(duration: 250.ms),
-        ],
-      ),
-    );
-  }
-}
-
-class _DemoAccountTile extends StatelessWidget {
-  const _DemoAccountTile({
-    required this.label,
-    required this.email,
-    required this.password,
-    required this.onTap,
-  });
-
-  final String label;
-  final String email;
-  final String password;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadius.sm),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpace.sm, vertical: AppSpace.xs),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          border: Border.all(color: colors.border),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label, style: Theme.of(context).textTheme.labelMedium),
-                  Text(
-                    '$email · $password',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.touch_app_outlined, size: 16, color: colors.textSecondary),
-          ],
         ),
       ),
     );
